@@ -8,24 +8,72 @@
 import SwiftUI
 
 struct ContentView: View {
+    let emojis: Array<String> = ["👻", "🎃", "🕷️", "😈", "💀", "🕸️", "🧙🏻", "🙀", "👹", "😱", "☠️", "🍭"]
+    @State var cardCount: Int = 4
     var body: some View {
-        
-        HStack {
-            CardView(isFaceUp: true)
-            CardView()
-            CardView()
-            CardView()
+        VStack {
+            ScrollView {
+                cards
+            }
+            
+            Spacer()
+            cardCountAdjuster
+            
+
             
         }
         .padding()
         .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
 
     }
+    
+    var cardCountAdjuster: some View {
+        HStack {
+            
+            cardRemover
+            Spacer()
+            cardAdder
+
+        }
+        .imageScale(.large)
+        .font(.largeTitle)
+    }
+    
+    
+    func cardCountAdjuster(by offset: Int, symbol: String) -> some View {
+        Button(action: {
+                cardCount += offset
+           
+        }, label: {
+            Image(systemName: symbol)
+        })
+        .disabled(cardCount + offset < 1 || cardCount + offset > emojis.count)
+    }
+    
+    var cards: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 120))]) {
+        
+            ForEach(0..<cardCount, id: \.self) { index in
+                CardView(content: emojis[index])
+                    .aspectRatio(2/3, contentMode: .fit)
+            }
+        }
+        .foregroundColor(.orange)
+    }
+
+    
+    var cardRemover: some View {
+        return cardCountAdjuster(by: -1, symbol: "rectangle.stack.badge.minus.fill")
+    }
+    
+    var cardAdder: some View {
+        return cardCountAdjuster(by: +1, symbol: "rectangle.stack.badge.plus.fill")
+    }
 }
 
 struct CardView: View {
-    
-    @State var isFaceUp = false // let swift infer isFaceUp is a Bool
+    let content: String
+    @State var isFaceUp = true // let swift infer isFaceUp is a Bool
     
     var body: some View {
         ZStack() {
@@ -33,7 +81,7 @@ struct CardView: View {
             if isFaceUp {
                 base.foregroundColor(.white)
                 base.strokeBorder(lineWidth: 2)
-                    Text("👻").font(.largeTitle)
+                    Text(content).font(.largeTitle)
             }
             
             else
